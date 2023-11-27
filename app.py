@@ -7,6 +7,7 @@ import DBcm
 import hfpy_utils  # created by Paul Barry
 import swim_utils  # created by Paul Barry
 import my_utils
+from datetime import datetime
 
 config = {
     "user": "root",
@@ -39,20 +40,31 @@ def get_session():
     
     return render_template(
         "selectSession.html", 
-        title="Choose Session",
+        title="Select a training session",
         data=dates
         )
 
 
 @app.post("/getswimmers")
 def get_swimmers_names():
-    NAMES = my_utils.getNames(FOLDER)  # List all names in the folder
-    SORTED_NAMES = sorted(NAMES)  # sort names alphabetically
+    session["sessionDate"] = request.form["date"]
+    dateChosenString = session["sessionDate"]
+    dateChosen = datetime.strptime(dateChosenString, "%Y-%m-%d")
+    
+    with DBcm.UseDatabase(config) as db:
+        SQL = """SELECT DISTINCT swimmer_id FROM times WHERE ts = %s"""
+        db.execute(SQL, dateChosen)
+        swimmer_ids = db.fetchall()
+
+        for id in swimmer_ids:
+            SQL = """SELECT swimmer_name FROM swimmers WHERE swimmer_id = %s"""
+            db.execute(SQL, (id))
+            names = db.fetchall()
 
     return render_template(
         "selectSwimmer.html",
         title="Select a swimmer to chart",
-        data=SORTED_NAMES,
+        data=names,
     )
 
 
