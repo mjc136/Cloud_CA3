@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+    <html>
+        <head>
+            <title>{{ title }}</title>
+            <style>
+                body {
+                    display: flex;
+                    flex-direction: column;
+                    position: relative;
+                    background-color: aquamarine;
+                    font-family: Arial, sans-serif;
+                    justify-content: center;
+                    align-items: center;
+                }
+            </style>
+        </head>
+        <body>
+            <h3>{{ title }}</h3>
+
+            {% block body %}
+
+                This is the body content.
+
+            {% endblock %}
+
+
+        <p>Michael Cullen C00261635.</p>
+        </body>
+    </html>                         

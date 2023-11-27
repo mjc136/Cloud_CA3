@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+
+{% block body %}
+
+    <script src="https://unpkg.com/htmx.org@1.9.9" integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX" crossorigin="anonymous"></script>
+
+    <form method="POST" action="/selectSwimmer">
+        <label for="date">Choose a Training Session</label>
+
+        <select name="date" id="date">
+
+            {% for date in data %}
+
+                <option value="{{date}}">{{ date }}</option>
+            
+            {% endfor %}
+
+        </select>
+        <p>
+            <input type="submit" value="Select">
+        </p>
+    </form>
+
+{% endblock %}
