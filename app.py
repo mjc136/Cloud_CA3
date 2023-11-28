@@ -7,7 +7,7 @@ import DBcm
 import hfpy_utils  # created by Paul Barry
 import swim_utils  # created by Paul Barry
 import my_utils
-from datetime import datetime
+from datetime import datetime, timedelta
 
 config = {
     "user": "root",
@@ -52,19 +52,31 @@ def get_swimmers_names():
     dateChosen = datetime.strptime(dateChosenString, "%Y-%m-%d")
     
     with DBcm.UseDatabase(config) as db:
-        SQL = """SELECT DISTINCT swimmer_id FROM times WHERE ts = %s"""
-        db.execute(SQL, dateChosen)
-        swimmer_ids = db.fetchall()
+        SQL = """SELECT DISTINCT swimmer_id FROM times 
+                    WHERE ts >= %s AND ts < %s"""
+        next_day = dateChosen + timedelta(days=1)
+        db.execute(SQL, (dateChosen, next_day))
 
-        for id in swimmer_ids:
+        swimmer_ids = db.fetchall()
+        for i in range(len(swimmer_ids)):
+            print(swimmer_ids[i][0])
+
+        names = []
+        namesData = []
+
+        for swimmer_id in swimmer_ids:
             SQL = """SELECT swimmer_name FROM swimmers WHERE swimmer_id = %s"""
-            db.execute(SQL, (id))
-            names = db.fetchall()
+            db.execute(SQL, swimmer_id)
+            name = db.fetchone()
+            names.append(name)
+
+        for i in range(len(names)):
+            print(namesData.append(names[i][0]))
 
     return render_template(
         "selectSwimmer.html",
         title="Select a swimmer to chart",
-        data=names,
+        data=namesData,
     )
 
 
