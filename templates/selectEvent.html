@@ -14,9 +14,9 @@
 
         <select name="event" id="event">
 
-            {% for event in data %}
+            {% for distance,stroke in data %}
 
-                <option value="{{event}}">{{ event }}</option>
+                <option value="{{distance}}-{{stroke}}">{{ distance }} {{ stroke }}</option>
             
             {% endfor %}
 

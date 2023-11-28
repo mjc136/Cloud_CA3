@@ -82,13 +82,14 @@ def list_swimmer_events():  # get all events from a swimmer
     next_day = dateChosen + timedelta(days=1)
 
     selected_swimmer = request.form["swimmer"]
-    name, age = selected_swimmer.split('-')
+    swimmerName, swimmerAge = selected_swimmer.split('-')
+    
 
     swimmers_event = []
 
     with DBcm.UseDatabase(config) as db:
         SQL = """SELECT swimmer_id FROM swimmers WHERE swimmer_name = %s AND swimmer_age = %s"""
-        db.execute(SQL, (name,age))
+        db.execute(SQL, (swimmerName,swimmerAge))
         swimmer_id = db.fetchone()
 
         SQL = """SELECT DISTINCT event_id FROM times WHERE swimmer_id = %s
@@ -107,48 +108,58 @@ def list_swimmer_events():  # get all events from a swimmer
     return render_template(
         "selectEvent.html",
         title="Select a swimmers event to chart",
+        name= swimmerName + " " + swimmerAge,
         data=swimmers_event,
     )
 
 
 @app.post("/chart")
 def display_chart():
-    event = request.form["event"]  # get result of select event
-    event = event.split(" ")
-    event = event[0] + "-" + event[1]  # format event to match filename
+    selected_swimmer = request.form["swimmer"]
+    swimmerName, swimmerAge = selected_swimmer.split('-')
 
-    for filename in os.listdir(FOLDER):
-        result = swim_utils.get_swimmers_data(filename)
+    selected_event = request.form["event"]
+    eventDistance, eventStroke = selected_event.split('-')
 
-        if (
-            session["SwimmerName"] == result[0]
-            and session["SwimmerName"] + "-"
-            and event in filename
-        ):
-            (
-                name,
-                age,
-                distance,
-                stroke,
-                the_times,
-                converts,
-                the_average,
-            ) = swim_utils.get_swimmers_data(
-                f"{session['SwimmerName']}-{result[1]}-{result[2]}-{result[3]}.txt"
-            )
+    dateChosenString = session["sessionDate"]
+    dateChosen = datetime.strptime(dateChosenString, "%Y-%m-%d")
+    next_day = dateChosen + timedelta(days=1)
 
-    the_title = f"{name} (Under {age}) {distance} {stroke}"
-    from_max = max(converts) + 50
-    the_converts = [hfpy_utils.convert2range(n, 0, from_max, 0, 350) for n in converts]
+    with DBcm.UseDatabase(config) as db:
+        SQL = """SELECT swimmer_id FROM swimmers WHERE swimmer_name = %s AND swimmer_age = %s"""
+        db.execute(SQL, (swimmerName,swimmerAge))
+        swimmer_id = db.fetchone()
 
-    the_data = zip(reversed(the_converts), reversed(the_times))
+        SQL = """SELECT event_id FROM events WHERE event_distance = %s AND event_stroke = %s"""
+        db.execute(SQL, (eventDistance,eventStroke))
+        event_id = db.fetchone()
 
-    return render_template(
-        "chart.html",
-        title=the_title,
-        average=the_average,
-        data=the_data,
-    )
+        SQL = """SELECT recorded_time FROM times WHERE swimmer_id = %s AND event_id = %s
+        AND ts >= %s AND ts < %s"""
+        db.execute(SQL, (swimmer_id,event_id, dateChosen, next_day))
+        times = db.fetchall()
+
+        converts = []
+
+        from statistics import mean
+
+        for time in times:
+            converts.append(swim_utils.convert2hundreths(time))
+            the_average = swim_utils.build_time_string(mean(converts))
+                
+
+        the_title = f"{swimmerName} (Under {swimmerAge}) {eventDistance} {eventStroke}"
+        from_max = max(converts) + 50
+        the_converts = [hfpy_utils.convert2range(n, 0, from_max, 0, 350) for n in converts]
+
+        the_data = zip(reversed(the_converts), reversed(times))
+
+        return render_template(
+            "chart.html",
+            title=the_title,
+            average=the_average,
+            data=the_data,
+        )
 
 
 if __name__ == "__main__":
