@@ -8,9 +8,9 @@
 
         <select name="swimmer" id="swimmer">
 
-            {% for name in data %}
+            {% for name, age in data %}
 
-                <option value="{{name}}">{{ name }}</option>
+                <option value="{{name}}-{{age}}">{{ name }} {{ age }}</option>
             
             {% endfor %}
 

@@ -24,7 +24,8 @@ app.secret_key = "SecretKey"
 
 @app.get("/")
 @app.get("/getSession")
-def get_session():
+
+def get_session(): # get all sessions
 
     with DBcm.UseDatabase(config) as db:
         SQL = """SELECT DISTINCT ts FROM times"""
@@ -46,7 +47,7 @@ def get_session():
 
 
 @app.post("/getswimmers")
-def get_swimmers_names():
+def get_swimmers_names():  # get all swimmers from a session
     session["sessionDate"] = request.form["date"]
     dateChosenString = session["sessionDate"]
     dateChosen = datetime.strptime(dateChosenString, "%Y-%m-%d")
@@ -56,41 +57,52 @@ def get_swimmers_names():
                     WHERE ts >= %s AND ts < %s"""
         next_day = dateChosen + timedelta(days=1)
         db.execute(SQL, (dateChosen, next_day))
-
         swimmer_ids = db.fetchall()
-        for i in range(len(swimmer_ids)):
-            print(swimmer_ids[i][0])
 
-        names = []
-        namesData = []
+        swimmers = []
 
-        for swimmer_id in swimmer_ids:
-            SQL = """SELECT swimmer_name FROM swimmers WHERE swimmer_id = %s"""
-            db.execute(SQL, swimmer_id)
-            name = db.fetchone()
-            names.append(name)
-
-        for i in range(len(names)):
-            print(namesData.append(names[i][0]))
+        for id in swimmer_ids:
+            SQL = """SELECT swimmer_name, swimmer_age FROM swimmers WHERE swimmer_id = %s"""
+            db.execute(SQL, id)
+            swimmer = db.fetchone()
+            swimmers.append(swimmer)
 
     return render_template(
         "selectSwimmer.html",
         title="Select a swimmer to chart",
-        data=namesData,
+        data=swimmers,
     )
 
 
 @app.post("/displayevents")
 def list_swimmer_events():  # get all events from a swimmer
-    session["SwimmerName"] = request.form["swimmer"]  # get result of select swimmer
-    swimmers_event = set()
 
-    for filename in os.listdir(FOLDER):
-        result = swim_utils.get_swimmers_data(filename)
-        event = result[2] + " " + result[3]  # split event and stroke
+    dateChosenString = session["sessionDate"]
+    dateChosen = datetime.strptime(dateChosenString, "%Y-%m-%d")
+    next_day = dateChosen + timedelta(days=1)
 
-        if session["SwimmerName"] == result[0]:
-            swimmers_event.add(event)
+    selected_swimmer = request.form["swimmer"]
+    name, age = selected_swimmer.split('-')
+
+    swimmers_event = []
+
+    with DBcm.UseDatabase(config) as db:
+        SQL = """SELECT swimmer_id FROM swimmers WHERE swimmer_name = %s AND swimmer_age = %s"""
+        db.execute(SQL, (name,age))
+        swimmer_id = db.fetchone()
+
+        SQL = """SELECT DISTINCT event_id FROM times WHERE swimmer_id = %s
+                AND ts >= %s AND ts < %s"""
+        db.execute(SQL, (swimmer_id[0], dateChosen, next_day))
+        event_ids = db.fetchall()
+        
+        for id in event_ids:
+
+            SQL = """SELECT event_distance, event_stroke FROM events WHERE event_id = %s"""
+            db.execute(SQL, id)
+            event = db.fetchone()
+
+            swimmers_event.append(event)
 
     return render_template(
         "selectEvent.html",
