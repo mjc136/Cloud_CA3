@@ -1,12 +1,10 @@
 from flask import Flask, render_template, request, session  # from module import Class.
 
-
-import os
 import DBcm
 
 import hfpy_utils  # created by Paul Barry
 import swim_utils  # created by Paul Barry
-import my_utils
+
 from datetime import datetime, timedelta
 
 config = {
@@ -15,8 +13,6 @@ config = {
     "database": "SwimmerApp",
     "host": "localhost",
 }
-
-FOLDER = r"swimdata/"
 
 app = Flask(__name__)
 app.secret_key = "SecretKey"
@@ -81,15 +77,17 @@ def list_swimmer_events():  # get all events from a swimmer
     dateChosen = datetime.strptime(dateChosenString, "%Y-%m-%d")
     next_day = dateChosen + timedelta(days=1)
 
-    selected_swimmer = request.form["swimmer"]
+    session["swimmer"] = request.form["swimmer"]
+    selected_swimmer = session["swimmer"]
     swimmerName, swimmerAge = selected_swimmer.split('-')
-    
+    session["swimmerName"] = swimmerName
+    session["swimmerAge"] = swimmerAge
 
     swimmers_event = []
 
     with DBcm.UseDatabase(config) as db:
         SQL = """SELECT swimmer_id FROM swimmers WHERE swimmer_name = %s AND swimmer_age = %s"""
-        db.execute(SQL, (swimmerName,swimmerAge))
+        db.execute(SQL, (swimmerName,int(swimmerAge)))
         swimmer_id = db.fetchone()
 
         SQL = """SELECT DISTINCT event_id FROM times WHERE swimmer_id = %s
@@ -115,8 +113,8 @@ def list_swimmer_events():  # get all events from a swimmer
 
 @app.post("/chart")
 def display_chart():
-    selected_swimmer = request.form["swimmer"]
-    swimmerName, swimmerAge = selected_swimmer.split('-')
+    swimmerName = session["swimmerName"]
+    swimmerAge = int(session["swimmerAge"]) 
 
     selected_event = request.form["event"]
     eventDistance, eventStroke = selected_event.split('-')
@@ -135,8 +133,8 @@ def display_chart():
         event_id = db.fetchone()
 
         SQL = """SELECT recorded_time FROM times WHERE swimmer_id = %s AND event_id = %s
-        AND ts >= %s AND ts < %s"""
-        db.execute(SQL, (swimmer_id,event_id, dateChosen, next_day))
+                AND ts >= %s AND ts < %s"""
+        db.execute(SQL, (swimmer_id[0], event_id[0], dateChosen, next_day))
         times = db.fetchall()
 
         converts = []
@@ -144,7 +142,7 @@ def display_chart():
         from statistics import mean
 
         for time in times:
-            converts.append(swim_utils.convert2hundreths(time))
+            converts.append(swim_utils.convert2hundreths(time[0]))
             the_average = swim_utils.build_time_string(mean(converts))
                 
 
@@ -163,4 +161,4 @@ def display_chart():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)  # Starts a local (test) webserver, and waits... forever.
+    app.run(debug=True)  
