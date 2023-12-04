@@ -3,7 +3,12 @@
 
 {% block body %}
 
-    <form method="POST" action="/getswimmers">
+    <a href = "/">
+        <button>Reset</button>
+    </a>
+    <br>
+
+    <form hx-post="/getswimmers" hx-target="#swimmers" hx-swap="outerHTML">
         <label for="date">Choose a Training Session</label>
 
         <select name="date" id="date">
@@ -19,5 +24,6 @@
             <input type="submit" value="Select">
         </p>
     </form>
+    <div id="swimmers"></div>
 
 {% endblock %}

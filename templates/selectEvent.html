@@ -3,13 +3,7 @@
 
 {% block body %}
 
-    <a href = "/">
-        <button>Back</button>
-    </a>
-
-    <br>
-
-    <form method="POST" action="/chart">
+    <form hx-post="/chart" hx-target="#chart" hx-swap="outerHTML">
         <label for="event">Choose an event completed by {{name}}:</label>
 
         <select name="event" id="event">
@@ -25,5 +19,6 @@
             <input type="submit" value="Select">
         </p>
     </form>
+    <div id="chart"></div>
 
 {% endblock %}

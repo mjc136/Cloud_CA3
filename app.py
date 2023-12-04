@@ -7,6 +7,7 @@ import swim_utils  # created by Paul Barry
 
 from datetime import datetime, timedelta
 
+
 config = {
     "user": "root",
     "password": "swim",
@@ -20,7 +21,6 @@ app.secret_key = "SecretKey"
 
 @app.get("/")
 @app.get("/getSession")
-
 def get_session(): # get all sessions
 
     with DBcm.UseDatabase(config) as db:

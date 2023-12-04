@@ -3,7 +3,7 @@
 
 {% block body %}
 
-    <form method="POST" action="/displayevents">
+    <form  hx-post="/displayevents" hx-target="#events" hx-swap="outerHTML">
         <label for="swimmer">Choose a swimmer:</label>
 
         <select name="swimmer" id="swimmer">
@@ -19,5 +19,6 @@
             <input type="submit" value="Select">
         </p>
     </form>
+    <div id="events"></div>
 
 {% endblock %}
