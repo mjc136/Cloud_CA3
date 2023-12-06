@@ -7,13 +7,23 @@ import swim_utils  # created by Paul Barry
 
 from datetime import datetime, timedelta
 
+import platform
 
-config = {
-    "user": "root",
-    "password": "swim",
-    "database": "SwimmerApp",
-    "host": "localhost",
-}
+
+if "aws" in platform.uname().release:
+    config = {
+        "user": "C00261635",
+        "password": "swimpasswd",
+        "database": "C00261635$default",
+        "host": "C00261635.mysql.pythonanywhere-services.com",
+        }
+else:
+        config = {
+        "user": "root",
+        "password": "swim",
+        "database": "SwimmerApp",
+        "host": "localhost",
+        }   
 
 app = Flask(__name__)
 app.secret_key = "SecretKey"
