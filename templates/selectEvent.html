@@ -7,7 +7,7 @@
         <label for="event">Choose an event completed by {{name}}:</label>
 
         <select name="event" id="event">
-
+            <option value="" disabled selected>Select an option</option>
             {% for distance,stroke in data %}
 
                 <option value="{{distance}}-{{stroke}}">{{ distance }} {{ stroke }}</option>

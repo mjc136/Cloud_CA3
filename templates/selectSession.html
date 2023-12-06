@@ -12,7 +12,7 @@
         <label for="date">Choose a Training Session</label>
 
         <select name="date" id="date">
-
+            <option value="" disabled selected>Select an option</option>
             {% for date in data %}
 
                 <option value="{{date}}">{{ date }}</option>

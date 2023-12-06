@@ -7,7 +7,7 @@
         <label for="swimmer">Choose a swimmer:</label>
 
         <select name="swimmer" id="swimmer" >
-
+            <option value="" disabled selected>Select an option</option>
             {% for name, age in data %}
 
                 <option value="{{name}}-{{age}}">{{ name }} {{ age }}</option>
