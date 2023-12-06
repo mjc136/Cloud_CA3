@@ -3,7 +3,7 @@
 
 {% block body %}
 
-    <form hx-post="/chart" hx-target="#chart" hx-swap="outerHTML">
+    <form hx-post="/chart" hx-target="#chart" hx-swap="outerHTML" hx-trigger="change">
         <label for="event">Choose an event completed by {{name}}:</label>
 
         <select name="event" id="event">
@@ -15,9 +15,6 @@
             {% endfor %}
 
         </select>
-        <p>
-            <input type="submit" value="Select">
-        </p>
     </form>
     <div id="chart"></div>
 

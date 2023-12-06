@@ -8,7 +8,7 @@
     </a>
     <br>
 
-    <form hx-post="/getswimmers" hx-target="#swimmers" hx-swap="outerHTML">
+    <form hx-post="/getswimmers" hx-target="#swimmers" hx-swap="outerHTML" hx-trigger="change">
         <label for="date">Choose a Training Session</label>
 
         <select name="date" id="date">
@@ -20,9 +20,6 @@
             {% endfor %}
 
         </select>
-        <p>
-            <input type="submit" value="Select">
-        </p>
     </form>
     <div id="swimmers"></div>
 
